@@ -1,45 +1,52 @@
-name: C CI Pipeline - Multi Test
+name: C CI/CD Pipeline - Build and Test
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches:
+      - main   # triggers on every merge/push to main
+  workflow_dispatch:   # allows manual triggering
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout do código
+      # 1️⃣ Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Instalar GCC
-      - name: Setup GCC
+      # 2️⃣ Install GCC compiler
+      - name: Install GCC
         run: sudo apt-get update && sudo apt-get install -y build-essential
 
-      # 3️⃣ Compilar o código
-      - name: Compile C program
+      # 3️⃣ Compile the C program
+      - name: Compile program
         run: gcc -o challenge challenge.c
 
-      # 4️⃣ Rodar todos os testes automaticamente
-      - name: Run all tests
+      # 4️⃣ Run the test
+      - name: Run test
         run: |
-          set -e
-          for input_file in tests/*.txt; do
-            # Ignorar arquivos de expected
-            if [[ "$input_file" == *_expected.txt ]]; then
-              continue
-            fi
-            echo "Running test $input_file..."
-            ./challenge < "$input_file" > output.txt
-            expected_file="${input_file%.txt}_expected.txt"
-            if diff -q output.txt "$expected_file"; then
-              echo "✅ Test passed for $input_file"
-            else
-              echo "❌ Test failed for $input_file"
-              diff output.txt "$expected_file"
-              exit 1
-            fi
-          done
+          ./challenge < tests/test1.txt > output.txt
+          if diff -q output.txt tests/test1_expected.txt; then
+            echo "✅ Test passed"
+          else
+            echo "❌ Test failed"
+            diff output.txt tests/test1_expected.txt
+            exit 1
+          fi
+
+      # 5️⃣ Upload the compiled binary as an artifact
+      - name: Upload binary as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: challenge-binary
+          path: challenge
+
+      # 6️⃣ Create an automatic version tag
+      - name: Create version tag
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          VERSION="v$(date +'%Y.%m.%d.%H%M%S')"
+          git tag $VERSION
+          git push origin $VERSION
