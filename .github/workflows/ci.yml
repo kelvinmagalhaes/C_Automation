@@ -59,7 +59,8 @@ jobs:
 
       # 6️⃣ Create automatic version tag
       - name: Create version tag
-        uses: peter-evans/create-tag@v3
-        with:
-          tag: v${{ github.run_id }}
-          push: true
+        if: success()  # only run if previous steps succeeded
+        run: |
+          VERSION="v$(date +'%Y.%m.%d.%H%M%S')"
+          git tag $VERSION
+          git push origin $VERSION
