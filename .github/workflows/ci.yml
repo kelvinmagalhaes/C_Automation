@@ -33,7 +33,7 @@ jobs:
               continue
             fi
             echo "Running test $input_file..."
-            ./my_program < "$input_file" > output.txt
+            ./challenge < "$input_file" > output.txt
             expected_file="${input_file%.txt}_expected.txt"
             if diff -q output.txt "$expected_file"; then
               echo "✅ Test passed for $input_file"
