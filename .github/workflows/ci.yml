@@ -59,7 +59,7 @@ jobs:
 
       # 6️⃣ Create automatic version tag
       - name: Create version tag
-        uses: kelvinmagalhaes/create-tag@v4
+        uses: peter-evans/create-tag@v3
         with:
           tag: v${{ github.run_id }}
           push: true
