@@ -1,4 +1,4 @@
-name: C CI Pipeline
+name: C CI Pipeline - Multi Test
 
 on:
   push:
@@ -11,22 +11,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout do código
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2️⃣ Instalar GCC
       - name: Setup GCC
         run: sudo apt-get update && sudo apt-get install -y build-essential
 
+      # 3️⃣ Compilar o código
       - name: Compile C program
         run: gcc -o challenge challenge.c
 
-      - name: Run test
+      # 4️⃣ Rodar todos os testes automaticamente
+      - name: Run all tests
         run: |
-          ./challenge < input.txt > output.txt
-          if diff -q output.txt expected_output.txt; then
-            echo "✅ Test passed"
-          else
-            echo "❌ Test failed"
-            diff output.txt expected_output.txt
-            exit 1
-          fi
+          set -e
+          for input_file in tests/*.txt; do
+            # Ignorar arquivos de expected
+            if [[ "$input_file" == *_expected.txt ]]; then
+              continue
+            fi
+            echo "Running test $input_file..."
+            ./challenge < "$input_file" > output.txt
+            expected_file="${input_file%.txt}_expected.txt"
+            if diff -q output.txt "$expected_file"; then
+              echo "✅ Test passed for $input_file"
+            else
+              echo "❌ Test failed for $input_file"
+              diff output.txt "$expected_file"
+              exit 1
+            fi
+          done

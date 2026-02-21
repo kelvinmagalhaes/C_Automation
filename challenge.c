@@ -1,89 +1,58 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<limits.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-int define_N(){
+int define_N() {
     int n;
-    printf("Insert the number of values: ");
-    fflush(stdout);
-    
     scanf("%d", &n);
 
-    if ((n < 0) && (n != -1))
-    {
+    if ((n < 0) && (n != -1)) {
         printf("Invalid entry.");
         return 1;
-    }
-    else if(n == -1 ){
-        printf("You exit the program");
+    } else if (n == -1) {
         exit(0);
     }
 
     return n;
 }
 
-int* define_vector(int n){
-    
-    // 1. Validação robusta (melhor fazer isso antes de chamar a função)
+int* define_vector(int n) {
     if (n <= 1) {
-        printf("Error: n must be greater than 1\n");
-        return NULL; 
-    }
-
-    // 2. Alocação no HEAP (esta memória persiste até você dar free())
-    int *vector = (int *) malloc(n * sizeof(int));
-
-    // 3. Verificação de segurança
-    if (vector == NULL) {
-        printf("Memory allocation failed!");
         return NULL;
     }
 
-    // 4. Preenchimento
-    for (int i = 0; i < n; i++) {
-        printf("Value [%d]: ", i);
-        scanf("%d", &vector[i]);
+    int *vector = (int *) malloc(n * sizeof(int));
+    if (vector == NULL) {
+        return NULL;
     }
 
-    // 5. Retorna o ponteiro para a memória que VOCÊ alocou
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &vector[i]);  // Apenas lê o valor, sem imprimir prompt
+    }
+
     return vector;
 }
 
-void Sort(int n, int *vector)
-{
+void Sort(int n, int *vector) {
     int max = vector[0];
     int min = vector[0];
-    int media=0;
+    int sum = 0;
 
-    for (int i = 0; i < n; i++)
-    {
-        media += vector[i];
+    for (int i = 0; i < n; i++) {
+        sum += vector[i];
     }
-    float med = media/n;
+    float avg = (float)sum / n;
 
-    for (int j = 0; j < n; j++)
-    {
-        if (min > vector[j])
-        {
-            min = vector[j];
-        }
-    }
-    
-    for (int j = 0; j < n; j++)
-    {
-        if (max < vector[j])
-        {
-            max = vector[j];
-        }
+    for (int i = 0; i < n; i++) {
+        if (vector[i] < min) min = vector[i];
+        if (vector[i] > max) max = vector[i];
     }
 
-    printf("Min: %d | Max: %d | Avg: %.2f",min,max,med);
+    printf("Min: %d | Max: %d | Avg: %.2f", min, max, avg);
 
     free(vector);
-
 }
 
-int main(void){
+int main(void) {
     setbuf(stdout, NULL);
     int N = define_N();
     int *vector = define_vector(N);
