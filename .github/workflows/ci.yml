@@ -52,7 +52,7 @@ jobs:
 
       # 5️⃣ Upload compiled binary as artifact
       - name: Upload binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: challenge-binary
           path: challenge
