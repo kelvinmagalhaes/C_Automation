@@ -22,7 +22,7 @@ jobs:
 
       - name: Run test
         run: |
-          ./my_program < input.txt > output.txt
+          ./challenge < input.txt > output.txt
           if diff -q output.txt expected_output.txt; then
             echo "✅ Test passed"
           else
