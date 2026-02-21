@@ -1,9 +1,9 @@
-name: C CI/CD Pipeline - Build and Test
+name: C CI/CD Pipeline - Full Build and Test
 
 on:
   push:
     branches:
-      - main   # triggers on every merge/push to main
+      - main       # triggers on every merge/push to main
   workflow_dispatch:   # allows manual triggering
 
 jobs:
@@ -11,40 +11,56 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout the repository
+      # 1️⃣ Checkout repository using checkout v4
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0           # required for tags and full history
+          persist-credentials: true  # allows using GITHUB_TOKEN to push
 
-      # 2️⃣ Install GCC compiler
+      # 2️⃣ Install GCC
       - name: Install GCC
         run: sudo apt-get update && sudo apt-get install -y build-essential
 
-      # 3️⃣ Compile the C program
+      # 3️⃣ Compile program
       - name: Compile program
         run: gcc -o challenge challenge.c
 
-      # 4️⃣ Run the test
-      - name: Run test
+      # 4️⃣ Run all tests in tests/ folder
+      - name: Run all tests
         run: |
-          ./challenge < tests/test1.txt > output.txt
-          if diff -q output.txt tests/test1_expected.txt; then
-            echo "✅ Test passed"
-          else
-            echo "❌ Test failed"
-            diff output.txt tests/test1_expected.txt
+          FAILED=0
+          for input_file in tests/*.txt; do
+            # skip expected output files
+            if [[ "$input_file" == *_expected.txt ]]; then
+              continue
+            fi
+            echo "Running test $input_file..."
+            ./challenge < "$input_file" > output.txt
+            expected_file="${input_file%.txt}_expected.txt"
+            if diff -q output.txt "$expected_file"; then
+              echo "✅ Test passed for $input_file"
+            else
+              echo "❌ Test failed for $input_file"
+              diff output.txt "$expected_file"
+              FAILED=1
+            fi
+          done
+          if [ $FAILED -eq 1 ]; then
             exit 1
           fi
 
-      # 5️⃣ Upload the compiled binary as an artifact
-      - name: Upload binary as artifact
+      # 5️⃣ Upload compiled binary as artifact
+      - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
           name: challenge-binary
           path: challenge
 
-      # 6️⃣ Create an automatic version tag using GitHub Token
+      # 6️⃣ Create automatic version tag
       - name: Create version tag
+        if: success()  # only run if previous steps succeeded
         run: |
           VERSION="v$(date +'%Y.%m.%d.%H%M%S')"
           git tag $VERSION
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} $VERSION
+          git push origin $VERSION
