@@ -1,3 +1,13 @@
+/*
+ * Firmware Processing Demo - Firmware DevOps Test
+ * Reads input stream, processes data, validates output
+ * Embedded-ready: fixed buffers, no dynamic allocation, error handling
+ * 
+ * Author: Kelvin Magalhaes | Embedded Integration Engineer
+ * Skills: C low-level, CI/CD pipelines, firmware build automation
+ */
+
+
 #include <stdio.h>
 #include <stdlib.h>
 
