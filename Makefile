@@ -23,3 +23,8 @@ clean:
 	rm -f $(TARGET) output.txt *.o *.hex
 
 .PHONY: all test valgrind clean
+
+test: $(TARGET)
+	./$(TARGET) < input.txt > output.txt
+	diff output.txt test1_expected.txt && echo "✓ Tests PASS" || echo "✗ Tests FAIL"
+
